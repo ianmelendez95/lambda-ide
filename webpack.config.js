@@ -7,9 +7,10 @@ module.exports = {
     index: './src/index.js',
     print: './src/print.js'
   },
+  devtool: 'eval',
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'Output Management'
+      title: 'Development'
     })
   ],
   output: {
