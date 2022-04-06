@@ -6,7 +6,7 @@ module.exports = {
   entry: {
     index: './src/index.ts',
   },
-  devtool: 'eval',
+  devtool: 'eval-source-map',
   plugins: [
     new HtmlWebpackPlugin({
       title: 'Development'

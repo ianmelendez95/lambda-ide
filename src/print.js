@@ -1,3 +1,7 @@
 export default function printMe() {
-  console.log('I get called from print.js!');
+  conole.log('I get called from print.js!');
+}
+
+export function throwException() {
+  throw new Error("whoopsie")
 }
