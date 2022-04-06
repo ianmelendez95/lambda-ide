@@ -4,8 +4,7 @@ const path = require('path');
 module.exports = {
   mode: 'development',
   entry: {
-    index: './src/index.js',
-    print: './src/print.js'
+    index: './src/index.ts',
   },
   devtool: 'eval',
   plugins: [
@@ -14,7 +13,7 @@ module.exports = {
     })
   ],
   output: {
-    filename: '[name].bundle.js',
+    filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
     clean: true
   },
@@ -23,7 +22,15 @@ module.exports = {
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.tsx?$/,
+        use: ['ts-loader'],
+        exclude: /node_modules/
       }
     ]
+  },
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js']
   }
 };
