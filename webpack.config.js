@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MonacoEditorWebpackPlugin = require('monaco-editor-webpack-plugin');
 const path = require('path');
 
 module.exports = {
@@ -9,8 +10,10 @@ module.exports = {
   devtool: 'eval-source-map',
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'Development'
-    })
+      title: 'Development',
+      template: 'index.html'
+    }),
+    new MonacoEditorWebpackPlugin()
   ],
   output: {
     filename: 'bundle.js',
@@ -27,6 +30,10 @@ module.exports = {
         test: /\.tsx?$/,
         use: ['ts-loader'],
         exclude: /node_modules/
+      },
+      {
+        test: /\.ttf$/,
+        type: 'asset/resource'
       }
     ]
   },
