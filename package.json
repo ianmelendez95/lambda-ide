@@ -13,6 +13,8 @@
   "license": "ISC",
   "devDependencies": {
     "@types/lodash": "^4.14.181",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
     "css-loader": "^6.7.1",
     "html-webpack-plugin": "^5.5.0",
     "monaco-editor-webpack-plugin": "^7.0.1",
@@ -25,6 +27,8 @@
   "dependencies": {
     "lodash": "^4.17.21",
     "monaco-editor": "^0.33.0",
-    "monaco-vim": "^0.3.2"
+    "monaco-vim": "^0.3.2",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
   }
 }
