@@ -17,20 +17,18 @@ export default function Editor(): React.ReactElement {
   })
 
   return (
-    <div>
+    <div style={{ display: "flex",
+                  height: "100%",
+                  flexFlow: "column nowrap" }}>
       <div id="container" 
            ref={editorRef}
-           style={{ width: 800,
-                    height: 600,
-                    border: "1px solid #ccc" }}>
-
+           style={{ border: "1px solid #ccc",
+                    flexGrow: 1 }}>
       </div>
       <div id="status-bar" 
            ref={statusBarRef}
-           style={{ width: 800,
-                    height: 20,
+           style={{ height: 20,
                     border: "1px solid #ccc" }}>
-
       </div>
     </div>
   )
