@@ -38,7 +38,8 @@ function setupMonaco(editorElement: HTMLDivElement,
                      statusBarElement: HTMLDivElement) {
   const editor: monaco.editor.IStandaloneCodeEditor = monaco.editor.create(editorElement, {
     value: '(lambda (x) (+ x x))',
-    language: 'scheme'
+    language: 'scheme',
+    theme: 'vs-dark'
   });
 
   initVimMode(editor, statusBarElement)

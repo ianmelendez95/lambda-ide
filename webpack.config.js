@@ -8,10 +8,18 @@ module.exports = {
     index: './src/index.ts',
   },
   devtool: 'eval-source-map',
+  devServer: {
+    static: {
+      directory: path.join(__dirname, 'dist'),
+    },
+    compress: true,
+    port: 9000,
+  },
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'Development',
-      template: 'index.html'
+      title: 'Lambda IDE',
+      template: 'index.html',
+      favicon: './src/favicon.ico'
     }),
     new MonacoEditorWebpackPlugin()
   ],
