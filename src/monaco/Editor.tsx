@@ -37,10 +37,12 @@ export default function Editor(): React.ReactElement {
 function setupMonaco(editorElement: HTMLDivElement,
                      statusBarElement: HTMLDivElement) {
   const editor: monaco.editor.IStandaloneCodeEditor = monaco.editor.create(editorElement, {
-    value: '[Sun Mar 7 16:02:00 2004] [notice] Apache/1.3.29 (Unix) configured -- resuming normal operations',
+    value: initialText,
     language: 'lambda',
-    theme: 'lambda-dark'
+    theme: 'vs-dark'
   });
 
   initVimMode(editor, statusBarElement)
 }
+
+const initialText = `(\\foo. foo bar) (\\baz. baz)`
