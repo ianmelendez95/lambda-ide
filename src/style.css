@@ -4,3 +4,17 @@ body {
 
   background-color: rgb(31, 34, 39);
 }
+
+.header-button {
+  margin: 8px;
+  font-size: 1em;
+  padding: 0.6rem;
+  border: none;
+  background-color: transparent;
+  color: rgb(214, 214, 214);
+}
+
+.header-button:hover {
+  border-radius: 5px;
+  background-color: rgb(48, 52, 60)
+}
