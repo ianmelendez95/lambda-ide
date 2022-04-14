@@ -1,9 +1,4 @@
 "use strict"
-// Written Docs for this tutorial step can be found here:
-// https://chevrotain.io/docs/tutorial/step1_lexing.html
-
-// Tutorial Step 1:
-// Implementation of A lexer for a simple SELECT statement grammar
 import * as chevrotain from 'chevrotain'
 
 type TokenType = chevrotain.TokenType
@@ -12,8 +7,6 @@ type TokenVocabulary = { [key: string]: TokenType }
 const Lexer = chevrotain.Lexer
 const createToken = chevrotain.createToken
 
-// createToken is used to create a TokenType
-// The Lexer's output will contain an array of token Objects created by metadata
 const Identifier = createToken({ name: "Identifier", pattern: /[a-zA-Z][\w-]*/ })
 
 const If = createToken({
@@ -48,11 +41,9 @@ const WhiteSpace = createToken({
   group: Lexer.SKIPPED
 })
 
-// The order of tokens is important
 const allTokens = [
   WhiteSpace,
 
-  // "keywords" appear before the Identifier
   If,
   True,
   False,
@@ -63,7 +54,6 @@ const allTokens = [
   LParen,
   RParen,
 
-  // The Identifier must appear after the keywords because all keywords are valid identifiers.
   Identifier,
   Integer
 ]
