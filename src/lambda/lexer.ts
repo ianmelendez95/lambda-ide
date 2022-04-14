@@ -7,40 +7,41 @@
 import * as chevrotain from 'chevrotain'
 
 type TokenType = chevrotain.TokenType
+type TokenVocabulary = { [key: string]: TokenType }
 
 const Lexer = chevrotain.Lexer
 const createToken = chevrotain.createToken
 
-// the vocabulary will be exported and used in the Parser definition.
-const tokenVocabulary: { [key: string]: TokenType } = {}
-
 // createToken is used to create a TokenType
 // The Lexer's output will contain an array of token Objects created by metadata
-const Identifier = createToken({ name: "Identifier", pattern: /[a-zA-Z]\w*/ })
+const Identifier = createToken({ name: "Identifier", pattern: /[a-zA-Z][\w-]*/ })
 
-// We specify the "longer_alt" property to resolve keywords vs identifiers ambiguity.
-// See: https://github.com/chevrotain/chevrotain/blob/master/examples/lexer/keywords_vs_identifiers/keywords_vs_identifiers.js
-const Select = createToken({
-  name: "",
-  pattern: /SELECT/,
+const If = createToken({
+  name: "If",
+  pattern: /if/,
   longer_alt: Identifier
 })
 
-const From = createToken({
-  name: "From",
-  pattern: /FROM/,
-  longer_alt: Identifier
-})
-const Where = createToken({
-  name: "Where",
-  pattern: /WHERE/,
+const True = createToken({
+  name: "True",
+  pattern: /true/,
   longer_alt: Identifier
 })
 
-const Comma = createToken({ name: "Comma", pattern: /,/ })
+const False = createToken({
+  name: "False",
+  pattern: /false/,
+  longer_alt: Identifier
+})
+
+const LParen = createToken({ name: "LParen", pattern: /\(/})
+const RParen = createToken({ name: "RParen", pattern: /\)/})
+
+const BSlash = createToken({ name: "BSlash", pattern: /\\/})
+const Dot = createToken({ name: "Dot", pattern: /\./})
+
+const StringLit = createToken({ name: "StringLit", pattern: /"([^"]|\\")*"/})
 const Integer = createToken({ name: "Integer", pattern: /0|[1-9]\d*/ })
-const GreaterThan = createToken({ name: "GreaterThan", pattern: />/ })
-const LessThan = createToken({ name: "LessThan", pattern: /</ })
 const WhiteSpace = createToken({
   name: "WhiteSpace",
   pattern: /\s+/,
@@ -50,35 +51,37 @@ const WhiteSpace = createToken({
 // The order of tokens is important
 const allTokens = [
   WhiteSpace,
+
   // "keywords" appear before the Identifier
-  Select,
-  From,
-  Where,
-  Comma,
+  If,
+  True,
+  False,
+
+  StringLit,
+  BSlash,
+  Dot,
+  LParen,
+  RParen,
+
   // The Identifier must appear after the keywords because all keywords are valid identifiers.
   Identifier,
-  Integer,
-  GreaterThan,
-  LessThan
+  Integer
 ]
 
-const SelectLexer = new Lexer(allTokens)
+const LambdaLexer = new Lexer(allTokens)
 
-allTokens.forEach((tokenType: chevrotain.TokenType) => {
-  const name: string = tokenType.name
-  tokenVocabulary[name] = tokenType
-})
+export const tokenVocabulary: { [key: string]: TokenType } = allTokens.reduce((vocab: TokenVocabulary, tokenType: TokenType) => { 
+  vocab[tokenType.name] = tokenType
+  return vocab
+}, {})
 
-module.exports = {
-  tokenVocabulary: tokenVocabulary,
+export function lex(inputText: string): chevrotain.ILexingResult {
+  const lexingResult = LambdaLexer.tokenize(inputText)
 
-  lex: function (inputText: string) {
-    const lexingResult = SelectLexer.tokenize(inputText)
-
-    if (lexingResult.errors.length > 0) {
-      throw Error("Sad Sad Panda, lexing errors detected")
-    }
-
-    return lexingResult
+  if (lexingResult.errors.length > 0) {
+    console.error("Lexing errors: ", lexingResult.errors)
+    throw Error("Lexing errors detected")
   }
+
+  return lexingResult
 }
