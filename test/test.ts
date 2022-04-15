@@ -1,8 +1,9 @@
 import * as chai from 'chai'
-import Lang from '../src/lambda/parser'
+import * as Lambda from '../src/lambda/parser'
 import * as Util from '../src/lambda/parser'
 
 const assert = chai.assert
+const Lang = Lambda.Lang
 
 describe('LambdaLang', function () {
   describe('#Var', function () {

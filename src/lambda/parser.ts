@@ -6,23 +6,23 @@ expr := var
       | (expr expr)
 */
 
-type App = {
+export type App = {
   kind: "app",
   val: [Expr, Expr]
 }
 
-type Var = {
+export type Var = {
   kind: "var",
   val: string
 }
 
-type Lambda = {
+export type Lambda = {
   kind: "lambda",
   var: Var,
   body: Expr
 }
 
-type Expr = Lambda | App | Var
+export type Expr = Lambda | App | Var
 
 export function mkVar(name: string): Var {
   return {
@@ -77,7 +77,7 @@ function between<A>(p: P.Parser<A>, bra: P.Parser<any>, cket: P.Parser<any>): P.
   return P.seqMap(bra, p, cket, (_bra, result, _cket) => result)
 }
 
-const LambdaLang: P.Language = P.createLanguage({
+export const Lang: P.Language = P.createLanguage({
   Var,
   App,
   Lambda,
@@ -86,5 +86,3 @@ const LambdaLang: P.Language = P.createLanguage({
     return P.optWhitespace;
   }
 })
-
-export default LambdaLang
