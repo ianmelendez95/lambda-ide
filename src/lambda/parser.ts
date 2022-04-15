@@ -1,73 +1,72 @@
-////////////////////////////////////////////////////////////////////////////////
-// Syntax
+import * as P from 'parsimmon'
 
-type LNode = LLam | LApp | LNum | LStr
-
-interface Pos {
-  row: number
-  colStart: number
-  colEnd: number
+type App = {
+  kind: "app",
+  val: [Expr, Expr]
 }
 
-interface LLam {
-  kind: "lam"
-  pos: Pos
-  var: string 
-  body: LNode
+type Var = {
+  kind: "var",
+  val: string
 }
 
-interface LApp {
-  kind: "app"
-  pos: Pos
-  exp1: LNode 
-  exp2: LNode
-}
+type Expr = App | Var
 
-interface LNum {
-  kind: "num"
-  pos: Pos
-  value: number
-}
-
-interface LStr {
-  kind: "str"
-  pos: Pos
-  value: string
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Tokens
-
-type Token = TLParen
-
-interface TLParen {
-  kind: "lparen"
-  pos: Pos
-}
-
-interface TRParen {
-  kind: "rparen"
-  pos: Pos
-}
-
-interface TIdent { 
-  kind: "ident"
-  pos: Pos
-
-}
-
-function parse(input: string): LNode {
-  return { 
-    kind: "num",
-    pos: {
-      row: 0,
-      colStart: 0,
-      colEnd: 2
-    },
-    value: 5
+function mkVar(name: string): Var {
+  return {
+    kind: "var",
+    val: name
   }
 }
 
-function tokenize(input: string): Token[] {
-  return []
+function mkApp(e1: Expr, e2: Expr): App {
+  return {
+    kind: "app",
+    val: [e1, e2]
+  }
 }
+
+function Var(): P.Parser<Var> {
+  return P.regexp(/[a-z][a-z0-9_-]*/).map(mkVar)
+}
+
+function App(r: P.Language): P.Parser<App> {
+  return P.seq(r.Var, r._, r.Var)
+    .map((parts) => mkApp(parts[0], parts[2]))
+}
+
+const Lambda: P.Language = P.createLanguage({
+  Var,
+  App,
+  Lambda: function(r) {
+    return P.seq(
+      P.regex(/\\/),
+      r.Var,
+      P.regex(/\./),
+      r._,
+      r.Expr
+    )
+  },
+  ExprBody: function(r) {
+    return P.alt(
+      r.Lambda,
+      r.App,
+      r.Var
+    )
+  },
+  Expr: function(r) {
+    return P.alt(
+      P.seq(
+        P.regex(/\(/),
+        r.ExprBody,
+        P.regex(/\)/)
+      ),
+      r.ExprBody
+    )
+  },
+  _: function() {
+    return P.optWhitespace;
+  }
+})
+
+export default Lambda

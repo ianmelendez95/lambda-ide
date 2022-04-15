@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { lex } from './lambda/lexer'
+import Lambda from './lambda/parser'
 import Editor, { EditorRef } from './monaco/Editor'
 import './style.css'
 
@@ -13,10 +13,7 @@ export default function App(): React.ReactElement {
     }
 
     const content: string = editorRef.current.getValue()
-    console.log("Content: ", editorRef.current.getValue())
-
-    const lexed = lex(content)
-    console.log("Lexed: ", lexed)
+    console.log("Parsed: ", Lambda.App.tryParse(content))
   }
 
   return (
