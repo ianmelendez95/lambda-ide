@@ -1,9 +1,6 @@
 import * as P from 'parsimmon'
 
 /*
-app := expr expr
-    
-
 expr := var
       | \ var . expr
       | (expr expr)
