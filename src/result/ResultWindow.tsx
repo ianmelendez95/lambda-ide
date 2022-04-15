@@ -9,20 +9,22 @@ type Props = {
   editorRef: EditorRef
 }
 
-type ParseResult = L.Expr | string
+type ParseState = L.Expr | string | null
 
 const Lang = L.Lang
 
-function showParseResult(result: ParseResult): string {
-  if (typeof result == 'string') {
-    return result
+function showParseState(state: ParseState): string {
+  if (state === null) {
+    return ""
+  } if (typeof state === 'string') {
+    return state
   } else {
-    return JSON.stringify(result)
+    return JSON.stringify(state)
   }
 }
 
 export default function ResultWindow({ editorRef }: Props) {
-  const [parseResult, setParseResult] = React.useState<ParseResult>(null)
+  const [parseResult, setParseResult] = React.useState<ParseState>(null)
 
   function onClickReduce() {
     if (editorRef.current == null) {
@@ -30,9 +32,8 @@ export default function ResultWindow({ editorRef }: Props) {
       return
     }
 
-    const content: string = editorRef.current.getValue()
     try {
-      setParseResult(Lang.Expr.tryParse(content))
+      setParseResult(Lang.Expr.tryParse(editorRef.current.getValue()))
     } catch (e) {
       setParseResult(e.message)
     }
@@ -50,7 +51,7 @@ export default function ResultWindow({ editorRef }: Props) {
       </div>
       <div>
         <pre className='expr-pre'>
-          {parseResult && showParseResult(parseResult)}
+          {showParseState(parseResult)}
         </pre>
       </div>
     </div>
