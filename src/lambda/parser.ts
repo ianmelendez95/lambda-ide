@@ -16,7 +16,7 @@ type Lambda = {
   body: Expr
 }
 
-type Expr = App | Var
+type Expr = Lambda | App | Var
 
 export function mkVar(name: string): Var {
   return {
@@ -50,39 +50,32 @@ function App(r: P.Language): P.Parser<App> {
 }
 
 function Lambda(r: P.Language): P.Parser<Lambda> {
-  return P.seq(
+  return P.seqMap(
     P.regex(/\\/),
     r.Var,
     P.regex(/\./),
     r._,
-    r.Expr
-  ).map((parsed) => {
-    const [_1, varName, _2, _3, body] = parsed
-    return mkLambda(varName, body)
-  })
+    r.Expr,
+    (_1, varName, _2, _3, body) => mkLambda(varName, body)
+  )
+}
+
+function Expr(r: P.Language): P.Parser<Expr> {
+  return P.alt(
+    between(r.Var, P.regex(/\(/), P.regex(/\)/)),
+    r.Var
+  )
+}
+
+function between<A>(p: P.Parser<A>, bra: P.Parser<any>, cket: P.Parser<any>): P.Parser<A> {
+  return P.seqMap(bra, p, cket, (_bra, result, _cket) => result)
 }
 
 const LambdaLang: P.Language = P.createLanguage({
   Var,
   App,
   Lambda,
-  ExprBody: function(r) {
-    return P.alt(
-      r.Lambda,
-      r.App,
-      r.Var
-    )
-  },
-  Expr: function(r) {
-    return P.alt(
-      P.seq(
-        P.regex(/\(/),
-        r.ExprBody,
-        P.regex(/\)/)
-      ),
-      r.ExprBody
-    )
-  },
+  Expr,
   _: function() {
     return P.optWhitespace;
   }

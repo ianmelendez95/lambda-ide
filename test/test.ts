@@ -31,4 +31,13 @@ describe('LambdaLang', function () {
       )
     })
   })
+
+  describe('#Expr', function () {
+    it('should parse var in parens', function () {
+      assert.deepEqual(
+        Lang.Expr.tryParse('(foo)'),
+        Util.mkVar('foo')
+      )
+    })
+  })
 });
