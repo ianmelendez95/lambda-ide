@@ -18,21 +18,21 @@ type Lambda = {
 
 type Expr = App | Var
 
-function mkVar(name: string): Var {
+export function mkVar(name: string): Var {
   return {
     kind: "var",
     val: name
   }
 }
 
-function mkApp(e1: Expr, e2: Expr): App {
+export function mkApp(e1: Expr, e2: Expr): App {
   return {
     kind: "app",
     val: [e1, e2]
   }
 }
 
-function mkLambda(v: Var, b: Expr): Lambda {
+export function mkLambda(v: Var, b: Expr): Lambda {
   return {
     kind: "lambda",
     var: v,

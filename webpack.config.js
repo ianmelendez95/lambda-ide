@@ -6,6 +6,7 @@ module.exports = {
   mode: 'development',
   entry: {
     index: './src/index.ts',
+    test: './test/test.ts'
   },
   devtool: 'eval-source-map',
   devServer: {
@@ -24,9 +25,8 @@ module.exports = {
     new MonacoEditorWebpackPlugin()
   ],
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
-    clean: true
+    filename: '[name].bundle.js',
+    path: path.resolve(__dirname, 'dist')
   },
   module: {
     rules: [

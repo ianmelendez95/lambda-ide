@@ -1,0 +1,16 @@
+#!/usr/bin/env node
+
+// Node script to spawn webpack and mocha processes, 
+// to have a test file watcher.
+// Elected over a bash script, as equivalent node script 
+// is much simpler.
+// (see 'trap' command in bash: https://stackoverflow.com/a/360275/10719983)
+
+const { spawn } = require('child_process');
+
+spawn('webpack', ['--watch'], {
+  stdio: ['ignore', 'ignore', 'inherit']
+})
+spawn('mocha', ['--watch', './dist/test.bundle.js'], {
+  stdio: 'inherit'
+})
