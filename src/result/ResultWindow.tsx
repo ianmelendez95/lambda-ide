@@ -1,15 +1,28 @@
+"use strict"; 
+
 import * as React from 'react'
-import * as Lambda from '../lambda/parser'
+import * as L from '../lambda/parser'
 import { EditorRef } from '../monaco/Editor'
+import { Result } from 'parsimmon'
 
 type Props = {
   editorRef: EditorRef
 }
 
-const Lang = Lambda.Lang
+type ParseResult = L.Expr | string
+
+const Lang = L.Lang
+
+function showParseResult(result: ParseResult): string {
+  if (typeof result == 'string') {
+    return result
+  } else {
+    return JSON.stringify(result)
+  }
+}
 
 export default function ResultWindow({ editorRef }: Props) {
-  const [expr, setExpr] = React.useState<Lambda.Expr>(null)
+  const [parseResult, setParseResult] = React.useState<ParseResult>(null)
 
   function onClickReduce() {
     if (editorRef.current == null) {
@@ -18,8 +31,11 @@ export default function ResultWindow({ editorRef }: Props) {
     }
 
     const content: string = editorRef.current.getValue()
-    const parsed: Lambda.Expr = Lang.Expr.tryParse(content)
-    setExpr(parsed)
+    try {
+      setParseResult(Lang.Expr.tryParse(content))
+    } catch (e) {
+      setParseResult(e.message)
+    }
   }
 
   return (
@@ -34,7 +50,7 @@ export default function ResultWindow({ editorRef }: Props) {
       </div>
       <div>
         <pre className='expr-pre'>
-          {expr && JSON.stringify(expr)}
+          {parseResult && showParseResult(parseResult)}
         </pre>
       </div>
     </div>
