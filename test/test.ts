@@ -33,10 +33,22 @@ describe('LambdaLang', function () {
   })
 
   describe('#Expr', function () {
-    it('should parse var in parens', function () {
+    it('should parse var', function () {
       assert.deepEqual(
-        Lang.Expr.tryParse('(foo)'),
+        Lang.Expr.tryParse('foo'),
         Util.mkVar('foo')
+      )
+    })
+    it('should parse lambda', function () {
+      assert.deepEqual(
+        Lang.Expr.tryParse('\\foo. bar'),
+        Util.mkLambda(Util.mkVar('foo'), Util.mkVar('bar'))
+      )
+    })
+    it('should parse lambda in parens', function () {
+      assert.deepEqual(
+        Lang.Expr.tryParse('(foo bar)'),
+        Util.mkApp(Util.mkVar('foo'), Util.mkVar('bar'))
       )
     })
   })

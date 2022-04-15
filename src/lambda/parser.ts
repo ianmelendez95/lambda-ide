@@ -1,5 +1,14 @@
 import * as P from 'parsimmon'
 
+/*
+app := expr expr
+    
+
+expr := var
+      | \ var . expr
+      | (expr expr)
+*/
+
 type App = {
   kind: "app",
   val: [Expr, Expr]
@@ -45,8 +54,7 @@ function Var(): P.Parser<Var> {
 }
 
 function App(r: P.Language): P.Parser<App> {
-  return P.seq(r.Var, r._, r.Var)
-    .map((parts) => mkApp(parts[0], parts[2]))
+  return P.seqMap(r.Expr, r._, r.Expr, (e1, _ws, e2) => mkApp(e1, e2))
 }
 
 function Lambda(r: P.Language): P.Parser<Lambda> {
@@ -56,14 +64,15 @@ function Lambda(r: P.Language): P.Parser<Lambda> {
     P.regex(/\./),
     r._,
     r.Expr,
-    (_1, varName, _2, _3, body) => mkLambda(varName, body)
+    (_bs, varName, _dot, _ws, body) => mkLambda(varName, body)
   )
 }
 
 function Expr(r: P.Language): P.Parser<Expr> {
   return P.alt(
-    between(r.Var, P.regex(/\(/), P.regex(/\)/)),
-    r.Var
+    r.Var,
+    r.Lambda,
+    between(r.App, P.regex(/\(/), P.regex(/\)/)),
   )
 }
 
