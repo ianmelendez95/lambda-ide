@@ -49,7 +49,7 @@ export default function ResultWindow({ editorRef }: Props) {
           Reduce
         </button>
       </div>
-      <div>
+      <div style={{ margin: 10 }}>
         <pre className='expr-pre'>
           {showParseState(parseResult)}
         </pre>
