@@ -23,4 +23,12 @@ describe('LambdaLang', function () {
     })
   })
 
+  describe('#Lambda', function () {
+    it('should parse simple', function () {
+      assert.deepEqual(
+        Lang.Lambda.tryParse('\\foo. bar'),
+        Util.mkLambda(Util.mkVar('foo'), Util.mkVar('bar'))
+      )
+    })
+  })
 });
