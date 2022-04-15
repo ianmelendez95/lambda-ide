@@ -10,6 +10,12 @@ type Var = {
   val: string
 }
 
+type Lambda = {
+  kind: "lambda",
+  var: Var,
+  body: Expr
+}
+
 type Expr = App | Var
 
 function mkVar(name: string): Var {
@@ -26,6 +32,14 @@ function mkApp(e1: Expr, e2: Expr): App {
   }
 }
 
+function mkLambda(v: Var, b: Expr): Lambda {
+  return {
+    kind: "lambda",
+    var: v,
+    body: b
+  }
+}
+
 function Var(): P.Parser<Var> {
   return P.regexp(/[a-z][a-z0-9_-]*/).map(mkVar)
 }
@@ -35,18 +49,23 @@ function App(r: P.Language): P.Parser<App> {
     .map((parts) => mkApp(parts[0], parts[2]))
 }
 
-const Lambda: P.Language = P.createLanguage({
+function Lambda(r: P.Language): P.Parser<Lambda> {
+  return P.seq(
+    P.regex(/\\/),
+    r.Var,
+    P.regex(/\./),
+    r._,
+    r.Expr
+  ).map((parsed) => {
+    const [_1, varName, _2, _3, body] = parsed
+    return mkLambda(varName, body)
+  })
+}
+
+const LambdaLang: P.Language = P.createLanguage({
   Var,
   App,
-  Lambda: function(r) {
-    return P.seq(
-      P.regex(/\\/),
-      r.Var,
-      P.regex(/\./),
-      r._,
-      r.Expr
-    )
-  },
+  Lambda,
   ExprBody: function(r) {
     return P.alt(
       r.Lambda,
@@ -69,4 +88,4 @@ const Lambda: P.Language = P.createLanguage({
   }
 })
 
-export default Lambda
+export default LambdaLang

@@ -13,7 +13,7 @@ export default function App(): React.ReactElement {
     }
 
     const content: string = editorRef.current.getValue()
-    console.log("Parsed: ", Lambda.App.tryParse(content))
+    console.log("Parsed: ", Lambda.Lambda.tryParse(content))
   }
 
   return (
