@@ -1,4 +1,5 @@
 import * as P from 'parsimmon'
+import * as L from './lang'
 
 /*
 expr := var
@@ -6,66 +7,26 @@ expr := var
       | (expr expr)
 */
 
-export type App = {
-  kind: "app",
-  val: [Expr, Expr]
+function Var(): P.Parser<L.Var> {
+  return P.regexp(/[a-z][a-z0-9_-]*/).map(L.mkVar)
 }
 
-export type Var = {
-  kind: "var",
-  val: string
+function App(r: P.Language): P.Parser<L.App> {
+  return P.seqMap(r.Expr, r._, r.Expr, (e1, _ws, e2) => L.mkApp(e1, e2))
 }
 
-export type Lambda = {
-  kind: "lambda",
-  var: Var,
-  body: Expr
-}
-
-export type Expr = Lambda | App | Var
-
-export function mkVar(name: string): Var {
-  return {
-    kind: "var",
-    val: name
-  }
-}
-
-export function mkApp(e1: Expr, e2: Expr): App {
-  return {
-    kind: "app",
-    val: [e1, e2]
-  }
-}
-
-export function mkLambda(v: Var, b: Expr): Lambda {
-  return {
-    kind: "lambda",
-    var: v,
-    body: b
-  }
-}
-
-function Var(): P.Parser<Var> {
-  return P.regexp(/[a-z][a-z0-9_-]*/).map(mkVar)
-}
-
-function App(r: P.Language): P.Parser<App> {
-  return P.seqMap(r.Expr, r._, r.Expr, (e1, _ws, e2) => mkApp(e1, e2))
-}
-
-function Lambda(r: P.Language): P.Parser<Lambda> {
+function Lambda(r: P.Language): P.Parser<L.Lambda> {
   return P.seqMap(
     P.regex(/\\/),
     r.Var,
     P.regex(/\./),
     r._,
     r.Expr,
-    (_bs, varName, _dot, _ws, body) => mkLambda(varName, body)
+    (_bs, varName, _dot, _ws, body) => L.mkLambda(varName, body)
   )
 }
 
-function Expr(r: P.Language): P.Parser<Expr> {
+function Expr(r: P.Language): P.Parser<L.Expr> {
   return P.alt(
     r.Var,
     r.Lambda,
@@ -77,7 +38,7 @@ function between<A>(p: P.Parser<A>, bra: P.Parser<any>, cket: P.Parser<any>): P.
   return P.seqMap(bra, p, cket, (_bra, result, _cket) => result)
 }
 
-export const Lang: P.Language = P.createLanguage({
+export const Parsers: P.Language = P.createLanguage({
   Var,
   App,
   Lambda,
@@ -86,3 +47,5 @@ export const Lang: P.Language = P.createLanguage({
     return P.optWhitespace;
   }
 })
+
+export default Parsers.Expr

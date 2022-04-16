@@ -1,30 +1,50 @@
 "use strict"; 
 
 import * as React from 'react'
-import * as L from '../lambda/parser'
+import * as L from '../lambda/lang'
+import Parser from '../lambda/parser'
 import { EditorRef } from '../monaco/Editor'
-import { Result } from 'parsimmon'
 
 type Props = {
   editorRef: EditorRef
 }
 
-type ParseState = L.Expr | string | null
+type NoneState = {
+  kind: "state-none"
+}
 
-const Lang = L.Lang
+type ErrorState = {
+  kind: "state-error",
+  message: string
+}
+
+type SuccessState = {
+  kind: "state-success",
+  value: L.Expr
+}
+
+type ParseState = NoneState | ErrorState | SuccessState
 
 function showParseState(state: ParseState): string {
-  if (state === null) {
+  if (state.kind === 'state-none') {
     return ""
-  } if (typeof state === 'string') {
-    return state
-  } else {
-    return JSON.stringify(state)
+  } else if (state.kind === 'state-error') {
+    return state.message
+  } else if (state.kind === 'state-success') {
+    return JSON.stringify(state.value)
   }
 }
 
+function successState(value: L.Expr): ParseState {
+  return { kind: 'state-success', value }
+}
+
+function errorState(message: string): ParseState {
+  return { kind: 'state-error', message }
+}
+
 export default function ResultWindow({ editorRef }: Props) {
-  const [parseResult, setParseResult] = React.useState<ParseState>(null)
+  const [parseState, setParseState] = React.useState<ParseState>({ kind: 'state-none' })
 
   function onClickReduce() {
     if (editorRef.current == null) {
@@ -33,9 +53,9 @@ export default function ResultWindow({ editorRef }: Props) {
     }
 
     try {
-      setParseResult(Lang.Expr.tryParse(editorRef.current.getValue()))
+      setParseState(successState(Parser.tryParse(editorRef.current.getValue())))
     } catch (e) {
-      setParseResult(e.message)
+      setParseState(errorState(e.message))
     }
   }
 
@@ -51,7 +71,7 @@ export default function ResultWindow({ editorRef }: Props) {
       </div>
       <div style={{ margin: 10 }}>
         <pre className='expr-pre'>
-          {showParseState(parseResult)}
+          {showParseState(parseState)}
         </pre>
       </div>
     </div>

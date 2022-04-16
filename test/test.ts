@@ -1,16 +1,16 @@
 import * as chai from 'chai'
-import * as Lambda from '../src/lambda/parser'
-import * as Util from '../src/lambda/parser'
+import * as L from '../src/lambda/lang'
+import Parser from '../src/lambda/parser'
+import { Parsers } from '../src/lambda/parser'
 
 const assert = chai.assert
-const Lang = Lambda.Lang
 
 describe('LambdaLang', function () {
   describe('#Var', function () {
     it('should parse simple', function () {
       assert.deepEqual(
-        Lang.Var.tryParse('foo'), 
-        Util.mkVar('foo')
+        Parsers.Var.tryParse('foo'), 
+        L.mkVar('foo')
       );
     });
   });
@@ -18,8 +18,8 @@ describe('LambdaLang', function () {
   describe('#App', function () {
     it('should parse simple', function () {
       assert.deepEqual(
-        Lang.App.tryParse('foo bar'),
-        Util.mkApp(Util.mkVar('foo'), Util.mkVar('bar'))
+        Parsers.App.tryParse('foo bar'),
+        L.mkApp(L.mkVar('foo'), L.mkVar('bar'))
       )
     })
   })
@@ -27,8 +27,8 @@ describe('LambdaLang', function () {
   describe('#Lambda', function () {
     it('should parse simple', function () {
       assert.deepEqual(
-        Lang.Lambda.tryParse('\\foo. bar'),
-        Util.mkLambda(Util.mkVar('foo'), Util.mkVar('bar'))
+        Parsers.Lambda.tryParse('\\foo. bar'),
+        L.mkLambda(L.mkVar('foo'), L.mkVar('bar'))
       )
     })
   })
@@ -36,20 +36,20 @@ describe('LambdaLang', function () {
   describe('#Expr', function () {
     it('should parse var', function () {
       assert.deepEqual(
-        Lang.Expr.tryParse('foo'),
-        Util.mkVar('foo')
+        Parsers.Expr.tryParse('foo'),
+        L.mkVar('foo')
       )
     })
     it('should parse lambda', function () {
       assert.deepEqual(
-        Lang.Expr.tryParse('\\foo. bar'),
-        Util.mkLambda(Util.mkVar('foo'), Util.mkVar('bar'))
+        Parsers.Expr.tryParse('\\foo. bar'),
+        L.mkLambda(L.mkVar('foo'), L.mkVar('bar'))
       )
     })
     it('should parse lambda in parens', function () {
       assert.deepEqual(
-        Lang.Expr.tryParse('(foo bar)'),
-        Util.mkApp(Util.mkVar('foo'), Util.mkVar('bar'))
+        Parsers.Expr.tryParse('(foo bar)'),
+        L.mkApp(L.mkVar('foo'), L.mkVar('bar'))
       )
     })
   })
