@@ -30,8 +30,8 @@ function showParseState(state: ParseState): string {
     return ""
   } else if (state.kind === 'state-error') {
     return state.message
-  } else if (state.kind === 'state-success') {
-    return JSON.stringify(state.value)
+  } else {
+    return L.showExpr(state.value)
   }
 }
 
