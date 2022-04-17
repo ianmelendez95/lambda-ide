@@ -11,10 +11,9 @@ function Var(): P.Parser<L.Var> {
   return P.regexp(/[a-z][a-z0-9_-]*/).map(L.mkVar)
 }
 
-function App(r: P.Language): P.Parser<L.App> {
-  return P.seqMap(r.Expr, r._, r.Expr, (e1, _ws, e2) => L.mkApp(e1, e2))
-}
-
+/**
+ * lambda := \ var . expr
+ */
 function Lambda(r: P.Language): P.Parser<L.Lambda> {
   return P.seqMap(
     P.regex(/\\/),
@@ -26,27 +25,47 @@ function Lambda(r: P.Language): P.Parser<L.Lambda> {
   )
 }
 
+/**
+ * term := var | lambda | ( expr )
+ */
+function Term(r: P.Language): P.Parser<L.Expr> {
+  return P.alt(r.Var, r.Lambda, parens(r.Expr))
+}
+
+/**
+ * expr := term expr => application
+ *       | term      => single expression
+ * 
+ * TODO - this results in right associative application, 
+ *        e.g. (a b c) => (a (b c)), 
+ *        when it should be left,
+ *        e.g. (a b c) => ((a b) c)
+ */
 function Expr(r: P.Language): P.Parser<L.Expr> {
-  return P.alt(
-    r.Var,
-    r.Lambda,
-    parens(r.Lambda),
-    parens(r.App)
+  const term: P.Parser<L.Expr> = token(r.Term)
+  const expr: P.Parser<L.Expr> = r.Expr
+
+  return term.chain<L.Expr>((firstTerm: L.Expr) =>
+    expr.map((nextTerm: L.Expr) => L.mkApp(firstTerm, nextTerm)).fallback(firstTerm)
   )
 }
 
 function parens<A>(p: P.Parser<A>): P.Parser<A> {
-  return between(p, P.regex(/\(/), P.regex(/\)/))
+  return between(p, token(P.regex(/\(/)), token(P.regex(/\)/)))
 }
 
 function between<A>(p: P.Parser<A>, bra: P.Parser<any>, cket: P.Parser<any>): P.Parser<A> {
   return P.seqMap(bra, p, cket, (_bra, result, _cket) => result)
 }
 
+function token<A>(p: P.Parser<A>): P.Parser<A> {
+  return P.seqMap(p, P.optWhitespace, (result, _w) => result)
+}
+
 export const Parsers: P.Language = P.createLanguage({
   Var,
-  App,
   Lambda,
+  Term,
   Expr,
   _: function() {
     return P.optWhitespace;
