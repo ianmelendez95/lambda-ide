@@ -58,5 +58,17 @@ describe('LambdaLang', function () {
         L.mkApp(L.mkLambda(L.mkVar('foo'), L.mkVar('foo')), L.mkVar('bar'))
       )
     })
+    it('should parse the Y combinator', function () {
+      assert.deepEqual(
+        Parsers.Expr.tryParse('(\\f. (\\x. f (x x)) (\\x. f (x x)))'),
+        L.mkLambda(L.mkVar('f'), 
+                   L.mkApp(L.mkLambda(L.mkVar('x'), 
+                                      L.mkApp(L.mkVar('f'),
+                                              L.mkApp(L.mkVar('x'), L.mkVar('x')))),
+                           L.mkLambda(L.mkVar('x'), 
+                                      L.mkApp(L.mkVar('f'),
+                                              L.mkApp(L.mkVar('x'), L.mkVar('x'))))))
+      )
+    })
   })
 });

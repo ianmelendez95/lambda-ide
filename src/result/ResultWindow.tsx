@@ -5,6 +5,7 @@ import * as L from '../lambda/lang'
 import * as R from '../lambda/reduce'
 import Parser from '../lambda/parser'
 import { EditorRef } from '../monaco/Editor'
+import { take } from '../util/generators';
 
 type Props = {
   editorRef: EditorRef
@@ -55,9 +56,10 @@ export default function ResultWindow({ editorRef }: Props) {
 
     try {
       const parsed: L.Expr = Parser.tryParse(editorRef.current.getValue())
-      const reduced: L.Expr[] = R.reduceScan(parsed)
+      const reduced: L.Expr[] = take(10, R.reduceGen(parsed))
       setParseState(successState(reduced))
     } catch (e) {
+      console.error(e)
       setParseState(errorState(e.message))
     }
   }

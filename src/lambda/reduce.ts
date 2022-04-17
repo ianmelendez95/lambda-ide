@@ -1,14 +1,21 @@
-import { string } from 'parsimmon'
+import { SimpleGenerator, unfoldr } from '../util/generators'
+import * as Maybe from '../util/Maybe'
 import * as L from './lang'
 
-type Maybe<T> = T | null
-
-export function reduceScan(expr: L.Expr): L.Expr[] {
-  const reduced = reduce1(expr)
-  return reduced ? [expr].concat(reduceScan(reduced)) : [expr]
+/**
+ * @returns generator of the expression as it is iteratively reduced
+ */
+export function reduceGen(expr: L.Expr): SimpleGenerator<L.Expr> {
+  return unfoldr(expr, (input: L.Expr) =>
+    Maybe.map(reduce1(input), (reduced) => [input, reduced])
+  )
 }
 
-export function reduce1(expr: L.Expr): Maybe<L.Expr> {
+/**
+ * @returns expression with one form beta reduced, 
+ *          or null if in (beta) normal form
+ */
+export function reduce1(expr: L.Expr): Maybe.Maybe<L.Expr> {
   if (expr.kind === 'app') {
     const func = expr.e1
     if (func.kind === 'lambda') {
@@ -17,6 +24,8 @@ export function reduce1(expr: L.Expr): Maybe<L.Expr> {
       const e1Reduced = reduce1(expr.e1)
       return e1Reduced ? L.mkApp(e1Reduced, expr.e2) : null
     }
+  } else {
+    return null
   }
 }
 

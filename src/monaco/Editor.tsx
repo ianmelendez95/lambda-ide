@@ -2,7 +2,7 @@ import * as React from "react";
 import * as monaco from 'monaco-editor'
 import { initVimMode } from 'monaco-vim'
 
-const INITIAL_TEXT = '((\\foo. foo) bar)'
+const INITIAL_TEXT = '(\\f. (\\x. f (x x)) (\\x. f (x x)))'
 
 export type EditorRef = React.MutableRefObject<monaco.editor.IStandaloneCodeEditor>
 
