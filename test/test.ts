@@ -52,5 +52,11 @@ describe('LambdaLang', function () {
         L.mkApp(L.mkVar('foo'), L.mkVar('bar'))
       )
     })
+    it('should parse applied lambda', function () {
+      assert.deepEqual(
+        Parsers.Expr.tryParse('((\\foo. foo) bar)'),
+        L.mkApp(L.mkLambda(L.mkVar('foo'), L.mkVar('foo')), L.mkVar('bar'))
+      )
+    })
   })
 });

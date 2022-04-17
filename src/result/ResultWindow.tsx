@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import * as L from '../lambda/lang'
+import * as R from '../lambda/reduce'
 import Parser from '../lambda/parser'
 import { EditorRef } from '../monaco/Editor'
 
@@ -20,7 +21,7 @@ type ErrorState = {
 
 type SuccessState = {
   kind: "state-success",
-  value: L.Expr
+  value: L.Expr[]
 }
 
 type ParseState = NoneState | ErrorState | SuccessState
@@ -31,11 +32,11 @@ function showParseState(state: ParseState): string {
   } else if (state.kind === 'state-error') {
     return state.message
   } else {
-    return L.showExpr(state.value)
+    return state.value.map(L.showExpr).join('\n')
   }
 }
 
-function successState(value: L.Expr): ParseState {
+function successState(value: L.Expr[]): ParseState {
   return { kind: 'state-success', value }
 }
 
@@ -53,7 +54,9 @@ export default function ResultWindow({ editorRef }: Props) {
     }
 
     try {
-      setParseState(successState(Parser.tryParse(editorRef.current.getValue())))
+      const parsed: L.Expr = Parser.tryParse(editorRef.current.getValue())
+      const reduced: L.Expr[] = R.reduceScan(parsed)
+      setParseState(successState(reduced))
     } catch (e) {
       setParseState(errorState(e.message))
     }

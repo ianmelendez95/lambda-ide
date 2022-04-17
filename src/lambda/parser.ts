@@ -30,8 +30,13 @@ function Expr(r: P.Language): P.Parser<L.Expr> {
   return P.alt(
     r.Var,
     r.Lambda,
-    between(r.App, P.regex(/\(/), P.regex(/\)/)),
+    parens(r.Lambda),
+    parens(r.App)
   )
+}
+
+function parens<A>(p: P.Parser<A>): P.Parser<A> {
+  return between(p, P.regex(/\(/), P.regex(/\)/))
 }
 
 function between<A>(p: P.Parser<A>, bra: P.Parser<any>, cket: P.Parser<any>): P.Parser<A> {

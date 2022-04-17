@@ -36,6 +36,6 @@ export function showExpr(expr: Expr): string {
   } else if (expr.kind === 'app') {
     return '(' + showExpr(expr.e1) + ' ' + showExpr(expr.e2) + ')'
   } else {
-    return '\\' + showExpr(expr.var) + '. ' + showExpr(expr.body)
+    return '(\\' + showExpr(expr.var) + '. ' + showExpr(expr.body) + ')'
   }
 }
