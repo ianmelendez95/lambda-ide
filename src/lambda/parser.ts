@@ -7,6 +7,10 @@ expr := var
       | (expr expr)
 */
 
+function Num(): P.Parser<L.Expr> {
+  return P.regexp(/(?:\+|\-)?[0-9]+(?:\.[0-9]+)?(?:e(?:\+|\-)[0-9]+)?/).map(Number).map(L.mkNum)
+}
+
 function Var(): P.Parser<L.Var> {
   return P.regexp(/(?:[a-z][a-z0-9_-]*)|(?:[<>!#$%&*+./<=>?@^\-~]+)/).map(L.mkVar)
 }
@@ -29,7 +33,7 @@ function Lambda(r: P.Language): P.Parser<L.Lambda> {
  * term := var | lambda | ( expr )
  */
 function Term(r: P.Language): P.Parser<L.Expr> {
-  return P.alt(r.Var, r.Lambda, parens(r.Expr))
+  return P.alt(r.Num, r.Var, r.Lambda, parens(r.Expr))
 }
 
 /**
@@ -63,6 +67,7 @@ function token<A>(p: P.Parser<A>): P.Parser<A> {
 }
 
 export const Parsers: P.Language = P.createLanguage({
+  Num,
   Var,
   Lambda,
   Term,

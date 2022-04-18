@@ -5,6 +5,11 @@ export type App = {
   e2: Expr
 }
 
+export type Num = {
+  kind: "num",
+  value: number
+}
+
 export type Var = {
   kind: "var",
   name: string
@@ -16,10 +21,14 @@ export type Lambda = {
   body: Expr
 }
 
-export type Expr = Lambda | App | Var
+export type Expr = Lambda | App | Var | Num
 
 export function mkVar(name: string): Var {
   return { kind: "var", name }
+}
+
+export function mkNum(value: number): Num {
+  return { kind: "num", value }
 }
 
 export function mkApp(e1: Expr, e2: Expr): App {
@@ -33,6 +42,8 @@ export function mkLambda(v: Var, body: Expr): Lambda {
 export function showExpr(expr: Expr): string {
   if (expr.kind === 'var') {
     return expr.name
+  } else if (expr.kind === 'num') {
+    return expr.value.toString()
   } else if (expr.kind === 'app') {
     return '(' + showExpr(expr.e1) + ' ' + showExpr(expr.e2) + ')'
   } else {

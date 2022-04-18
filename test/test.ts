@@ -1,6 +1,5 @@
 import * as chai from 'chai'
 import * as L from '../src/lambda/lang'
-import Parser from '../src/lambda/parser'
 import { Parsers } from '../src/lambda/parser'
 
 const assert = chai.assert
@@ -17,6 +16,12 @@ describe('LambdaLang', function () {
       assert.deepEqual(
         Parsers.Expr.tryParse('<='),
         L.mkVar('<=')
+      )
+    })
+    it('should parse number', function () {
+      assert.deepEqual(
+        Parsers.Expr.tryParse('-123.4e+4'),
+        L.mkNum(-1234000)
       )
     })
     it('should parse lambda', function () {
