@@ -1,8 +1,9 @@
 import * as React from "react";
 import * as monaco from 'monaco-editor'
 import { initVimMode } from 'monaco-vim'
+import lambdaSrc from '../exprs/fact.lambda'
 
-const INITIAL_TEXT = '(\\f. (\\x. f (x x)) (\\x. f (x x)))'
+const INITIAL_TEXT = lambdaSrc
 
 export type EditorRef = React.MutableRefObject<monaco.editor.IStandaloneCodeEditor>
 

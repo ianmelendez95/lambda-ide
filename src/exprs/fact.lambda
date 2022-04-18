@@ -1,0 +1,1 @@
+(\f. (\x. f (x x)) (\x. f (x x))) (\fact. \n. if (< n 2) 1 (* n (fact (- n 1))))

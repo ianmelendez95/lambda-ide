@@ -42,6 +42,10 @@ module.exports = {
       {
         test: /\.ttf$/,
         type: 'asset/resource'
+      },
+      {
+        test: /\.lambda$/,
+        type: 'asset/source'
       }
     ]
   },
