@@ -8,9 +8,17 @@
 
 const { spawn } = require('child_process');
 
-spawn('webpack', ['--watch'], {
-  stdio: ['ignore', 'ignore', 'inherit']
+console.log("Running Webpack, Mocha will run after first successful build")
+const pack = spawn('webpack', ['--watch'], {
+  stdio: ['ignore', 'pipe', 'inherit']
 })
-spawn('mocha', ['--watch', './dist/test.bundle.js'], {
-  stdio: 'inherit'
+pack.stdout.setEncoding('utf-8')
+pack.stdout.on('data', function (data) {
+  if (data.includes('compiled successfully')) {
+    spawn('mocha', ['--watch', './dist/test.bundle.js'], {
+      stdio: 'inherit'
+    })
+  } else {
+    console.log(data)
+  }
 })
