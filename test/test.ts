@@ -13,6 +13,12 @@ describe('LambdaLang', function () {
         L.mkVar('foo')
       )
     })
+    it('should parse symbolic var', function () {
+      assert.deepEqual(
+        Parsers.Expr.tryParse('<='),
+        L.mkVar('<=')
+      )
+    })
     it('should parse lambda', function () {
       assert.deepEqual(
         Parsers.Expr.tryParse('\\foo. bar'),

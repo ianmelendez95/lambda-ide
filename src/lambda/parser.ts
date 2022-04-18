@@ -8,7 +8,7 @@ expr := var
 */
 
 function Var(): P.Parser<L.Var> {
-  return P.regexp(/[a-z][a-z0-9_-]*/).map(L.mkVar)
+  return P.regexp(/(?:[a-z][a-z0-9_-]*)|(?:[<>!#$%&*+./<=>?@\\^\-~]+)/).map(L.mkVar)
 }
 
 /**
