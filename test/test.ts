@@ -42,6 +42,12 @@ describe('LambdaLang', function () {
         L.mkApp(L.mkLambda(L.mkVar('foo'), L.mkVar('foo')), L.mkVar('bar'))
       )
     })
+    it('should parse multiple apply', function () {
+      assert.deepEqual(
+        Parsers.Expr.tryParse('(foo bar baz qux)'),
+        L.mkApp(L.mkApp(L.mkApp(L.mkVar('foo'), L.mkVar('bar')), L.mkVar('baz')), L.mkVar('qux'))
+      )
+    })
     it('should parse the Y combinator', function () {
       assert.deepEqual(
         Parsers.Expr.tryParse('\\f. (\\x. f (x x)) (\\x. f (x x))'),

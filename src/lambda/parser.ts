@@ -36,21 +36,24 @@ function Term(r: P.Language): P.Parser<L.Expr> {
   return P.alt(r.Num, r.Var, r.Lambda, parens(r.Expr))
 }
 
+function mkExprFromSeqTerms(firstTerm: L.Expr, restTerms: L.Expr[]): L.Expr {
+  if (restTerms.length === 0) {
+    return firstTerm
+  } else {
+    const lastTerm: L.Expr = restTerms.pop()
+    return L.mkApp(mkExprFromSeqTerms(firstTerm, restTerms), lastTerm)
+  }
+}
+
 /**
- * expr := term expr => application
+ * expr := expr term => application
  *       | term      => single expression
- * 
- * TODO - this results in right associative application, 
- *        e.g. (a b c) => (a (b c)), 
- *        when it should be left,
- *        e.g. (a b c) => ((a b) c)
  */
 function Expr(r: P.Language): P.Parser<L.Expr> {
   const term: P.Parser<L.Expr> = token(r.Term)
-  const expr: P.Parser<L.Expr> = r.Expr
 
-  return term.chain<L.Expr>((firstTerm: L.Expr) =>
-    expr.map((nextTerm: L.Expr) => L.mkApp(firstTerm, nextTerm)).fallback(firstTerm)
+  return term.chain<L.Expr>((first: L.Expr) => 
+    term.many().map<L.Expr>((rest: L.Expr[]) => mkExprFromSeqTerms(first, rest))
   )
 }
 
