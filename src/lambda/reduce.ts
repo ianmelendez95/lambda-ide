@@ -30,7 +30,9 @@ export function reduce1(expr: L.Expr): Maybe.Maybe<L.Expr> {
 }
 
 function applyLambda(varName: string, varValue: L.Expr, body: L.Expr): L.Expr {
-  if (body.kind === 'var') {
+  if (body.kind === 'num') {
+    return body
+  } else if (body.kind === 'var') {
     return (body.name === varName) ? varValue : body
   } else if (body.kind === 'lambda') {
     return (body.var.name === varName) 
