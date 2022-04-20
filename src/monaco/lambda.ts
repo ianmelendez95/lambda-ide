@@ -3,6 +3,22 @@ import * as monaco from 'monaco-editor'
 export default function registerLambdaLanguage(): void {
   monaco.languages.register({ id: 'lambda' });
   monaco.languages.setMonarchTokensProvider('lambda', createMonarchTokensProvider());
+
+  monaco.languages.setLanguageConfiguration('lambda', {
+    brackets: [
+      ['(', ')'],
+    ],
+  
+    autoClosingPairs: [
+      { open: '(', close: ')' },
+      { open: '"', close: '"' }
+    ],
+  
+    surroundingPairs: [
+      { open: '(', close: ')' },
+      { open: '"', close: '"' }
+    ]
+  })
 }
 
 // monarch editor: https://microsoft.github.io/monaco-editor/monarch.html
@@ -10,9 +26,11 @@ export default function registerLambdaLanguage(): void {
 function createMonarchTokensProvider(): monaco.languages.IMonarchLanguage {
   return {
     // Set defaultToken to invalid to see what you do not tokenize yet
-    // defaultToken: 'invalid',
+    defaultToken: 'invalid',
 
     keywords: [ 'if' ],
+
+    brackets: [{ open: '(', close: ')', token: 'delimiter.parenthesis' }],
 
     // // we include these common regular expressions
     symbols: /[=><!~?:&|+\-*\/\^%]+/,
