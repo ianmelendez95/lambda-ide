@@ -1,0 +1,18 @@
+(\f. (\x. f (x x)) (\x. f (x x))) (\fact. \n. if (< n 2) 1 (* n (fact (- n 1)))) 5
+
+#fact = (\fact. \n. if (< n 2) 1 (* n (fact (- n 1))))
+
+(\f. (\x. f (x x)) (\x. f (x x))) #fact 5
+(\x. #fact (x x)) (\x. #fact (x x)) 5
+
+#xfact = (\x. #fact (x x))
+
+#fact (#xfact #xfact) 5
+(\fact. \n. if (< n 2) 1 (* n (fact (- n 1)))) (#xfact #xfact) 5
+
+(\n. if (< n 2) 1 (* n ((#xfact #xfact) (- n 1)))) 5
+(if (< 5 2) 1 (* 5 ((#xfact #xfact) (- 5 1))))
+(* 5 ((#xfact #xfact) (- 5 1)))
+(* 5 (((\x. #fact (x x)) #xfact) (- 5 1)))
+(* 5 ((#fact (#xfact #xfact)) (- 5 1)))
+(* 5 (((\fact. \n. if (< n 2) 1 (* n (fact (- n 1)))) (#xfact #xfact)) (- 5 1)))
