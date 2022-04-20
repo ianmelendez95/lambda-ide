@@ -27,13 +27,19 @@ type SuccessState = {
 
 type ParseState = NoneState | ErrorState | SuccessState
 
-function showParseState(state: ParseState): string {
+function showParseState(state: ParseState): string | JSX.Element[] {
   if (state.kind === 'state-none') {
-    return ""
+    return 
   } else if (state.kind === 'state-error') {
     return state.message
   } else {
-    return state.value.map(L.showExpr).join('\n')
+    return state.value.map((expr) => {
+      return (
+        <div className="expr-div">
+          <pre>{L.showExpr(expr)}</pre>
+        </div>
+      )
+    })
   }
 }
 
@@ -45,7 +51,7 @@ function errorState(message: string): ParseState {
   return { kind: 'state-error', message }
 }
 
-export default function ResultWindow({ editorRef }: Props) {
+export default function ResultWindow({ editorRef }: Props): JSX.Element {
   const [parseState, setParseState] = React.useState<ParseState>({ kind: 'state-none' })
 
   function onClickReduce() {
@@ -74,11 +80,7 @@ export default function ResultWindow({ editorRef }: Props) {
           Reduce
         </button>
       </div>
-      <div style={{ margin: 10 }}>
-        <pre className='expr-pre'>
-          {showParseState(parseState)}
-        </pre>
-      </div>
+      {showParseState(parseState)}
     </div>
   )
 }

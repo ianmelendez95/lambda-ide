@@ -1,7 +1,9 @@
-body {
+body, pre {
   padding: 0;
   margin: 0;
+}
 
+body {
   background-color: rgb(31, 34, 39);
 }
 
@@ -21,4 +23,10 @@ body {
 
 .expr-pre {
   color: rgb(195, 195, 195)
+}
+
+.expr-div {
+  padding: 10px 5px;
+  color: rgb(195, 195, 195);
+  border-bottom: 1px solid gray;
 }
