@@ -1,6 +1,6 @@
 import * as chai from 'chai'
 import * as PP from '../src/lambda/pprint'
-import { Doc, concat, line, nest, nil, text } from '../src/lambda/pprint'
+import { Doc, concat, line, nest, nil, text, layout } from '../src/lambda/pprint'
 
 const assert = chai.assert
 
@@ -14,7 +14,7 @@ describe('pprint', function () {
         '    ffff[gg,',
         '         hhh,',
         '         ii]]'
-      ].join('\n'), showTree(testTree()))
+      ].join('\n'), layout(showTree(testTree())))
     })
   })
   describe('#showTreeAlt', function () {
@@ -28,7 +28,7 @@ describe('pprint', function () {
         '       hhh,',
         '       ii]',
         ']'
-      ].join('\n'), showTreeAlt(testTree()))
+      ].join('\n'), layout(showTreeAlt(testTree())))
     })
   })
 })

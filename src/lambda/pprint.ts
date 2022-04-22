@@ -1,109 +1,72 @@
 import * as L from './lang'
 
-export type Doc = string
+export type Doc = Concat | Nil | Line | Text | Nest
+
+export type Nil = { kind: 'nil' }
+
+export type Line = { kind: 'line' }
+
+export type Concat = {
+  kind: 'concat',
+  left: Doc,
+  right: Doc
+}
+
+export type Text = {
+  kind: 'text',
+  text: string
+}
+
+export type Nest = {
+  kind: 'nest', 
+  depth: number, // integer
+  doc: Doc
+}
+
+const NIL: Nil = { kind: 'nil' }
+const LINE: Line = { kind: 'line' }
 
 export function concat(left: Doc, right: Doc, ...rest: Doc[]): Doc {
   if (rest.length === 0) {
-    return left.concat(right)
+    return { kind: 'concat', left, right }
   } else {
-    return left.concat(concat(right, rest[0], ...rest.slice(1)))
+    return { 
+      kind: 'concat', 
+      left, 
+      right: concat(right, rest[0], ...rest.slice(1)) 
+    }
   }
 }
 
 export function nil(): Doc {
-  return ""
+  return NIL
 }
 
 export function text(text: string): Doc {
-  return text
+  return { kind: 'text', text }
 }
 
 export function line(): Doc {
-  return '\n'
+  return LINE
 }
 
 export function nest(depth: number, doc: Doc): Doc {
-  const indent = ' '.repeat(depth)
-  return doc.replace(/\n/g, '\n' + indent)
+  return { kind: 'nest', depth, doc }
 }
 
 export function layout(doc: Doc): string {
-  return doc
-}
-
-
-/**
- * data Tree = Node String [Tree]
- */
-type Tree = {
-  value: string,
-  children: Tree[]
-}
-
-/**
- * showTree (Node s ts) = text s <> nest (length s) (showBracket ts)
- */
-export function showTree({ value, children }: Tree): Doc {
-  const s = value
-  const ts = children
-  return concat(text(s), nest(s.length, showBracket(ts)))
-}
-
-/**
- * showBracket [] = nil
- * showBracket ts = text "[" <> nest 1 (showTrees ts) <> text "]"
- */
-export function showBracket(ts: Tree[]): Doc {
-  return ts.length === 0
-    ? nil()
-    : concat(text("["),
-      nest(1, showTrees(ts)),
-      text("]"))
-}
-
-/**
- * showTrees [t] = showTree t
- * showTrees (t:ts) = showTree t <> text "," <> line <> showTrees ts
- */
-export function showTrees(ts: Tree[]): Doc {
-  if (ts.length === 0) {
-    throw new Error('Expecting at least one tree')
-  } else if (ts.length === 1) {
-    return showTree(ts[0])
+  if (doc.kind === 'concat') {
+    return layout(doc.left).concat(layout(doc.right))
+  } else if (doc.kind === 'nil') {
+    return ''
+  } else if (doc.kind === 'line') {
+    return '\n'
+  } else if (doc.kind === 'text') {
+    return doc.text
+  } else if (doc.kind === 'nest') {
+    const indent = ' '.repeat(doc.depth)
+    return layout(doc.doc).replace(/\n/g, '\n' + indent)
   } else {
-    return concat(
-      showTree(ts[0]),
-      text(","),
-      line(),
-      showTrees(ts.slice(1))
-    )
+    throw new Error("Unrecognized document: " + doc)
   }
-}
-
-/**
- * aaa[bbbbb[ccc, 
- *           dd],
- * eee,
- * ffff[gg,
- *      hhh,
- *      ii]]
- */
-export function testTree(): Tree {
-  return {
-    value: "aaa",
-    children: [{
-      value: "bbbbb", children: [{ value: "ccc", children: [] },
-      { value: "dd", children: [] }]
-    },
-    { value: "eee", children: [] },
-    {
-      value: "ffff", children: [{ value: "gg", children: [] },
-      { value: "hhh", children: [] },
-      { value: "ii", children: [] }]
-    }]
-  }
-}
-
-export function pprint(expr: L.Expr): string {
-  return L.showExpr(expr)
 }
