@@ -1,4 +1,3 @@
-import * as _ from 'lodash'
 import './style.css'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom/client'
