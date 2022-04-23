@@ -1,40 +1,38 @@
-import * as L from './lang'
-
-export type Doc = Concat | Nil | Line | Text | Nest
+export type Doc = Nil | Line | Text
 
 export type Nil = { kind: 'nil' }
 
-export type Line = { kind: 'line' }
-
-export type Concat = {
-  kind: 'concat',
-  left: Doc,
-  right: Doc
-}
-
 export type Text = {
   kind: 'text',
-  text: string
+  text: string,
+  next: Doc
 }
 
-export type Nest = {
-  kind: 'nest', 
+export type Line = {
+  kind: 'line', 
   depth: number, // integer
-  doc: Doc
+  next: Doc
 }
 
 const NIL: Nil = { kind: 'nil' }
-const LINE: Line = { kind: 'line' }
 
 export function concat(left: Doc, right: Doc, ...rest: Doc[]): Doc {
   if (rest.length === 0) {
-    return { kind: 'concat', left, right }
+    return concatTwo(left, right)
   } else {
-    return { 
-      kind: 'concat', 
-      left, 
-      right: concat(right, rest[0], ...rest.slice(1)) 
-    }
+    return concat(concatTwo(left, right), rest[0], ...rest.slice(1))
+  }
+}
+
+function concatTwo(left: Doc, right: Doc): Doc {
+  if (left.kind === 'nil') {
+    return right
+  } else if (left.kind === 'text') {
+    return { kind: 'text', text: left.text, next: concatTwo(left.next, right) }
+  } else if (left.kind === 'line') {
+    return { kind: 'line', depth: left.depth, next: concatTwo(left.next, right) }
+  } else {
+    throw new Error()
   }
 }
 
@@ -43,30 +41,31 @@ export function nil(): Doc {
 }
 
 export function text(text: string): Doc {
-  return { kind: 'text', text }
+  return { kind: 'text', text, next: nil() }
 }
 
 export function line(): Doc {
-  return LINE
+  return { kind: 'line', depth: 0, next: nil() }
 }
 
 export function nest(depth: number, doc: Doc): Doc {
-  return { kind: 'nest', depth, doc }
+  if (doc.kind === 'nil') {
+    return nil()
+  } else if (doc.kind === 'text') {
+    return { kind: 'text', text: doc.text, next: nest(depth, doc.next) }
+  } else if (doc.kind === 'line') {
+    return { kind: 'line', depth: depth + doc.depth, next: nest(depth, doc.next) }
+  }
 }
 
 export function layout(doc: Doc): string {
-  if (doc.kind === 'concat') {
-    return layout(doc.left).concat(layout(doc.right))
-  } else if (doc.kind === 'nil') {
+  if (doc.kind === 'nil') {
     return ''
   } else if (doc.kind === 'line') {
-    return '\n'
+    return '\n' + ' '.repeat(doc.depth) + layout(doc.next)
   } else if (doc.kind === 'text') {
-    return doc.text
-  } else if (doc.kind === 'nest') {
-    const indent = ' '.repeat(doc.depth)
-    return layout(doc.doc).replace(/\n/g, '\n' + indent)
+    return doc.text + layout(doc.next)
   } else {
-    throw new Error("Unrecognized document: " + doc)
+    throw new Error()
   }
 }

@@ -1,5 +1,4 @@
 import * as chai from 'chai'
-import * as PP from '../src/lambda/pprint'
 import { Doc, concat, line, nest, nil, text, layout } from '../src/lambda/pprint'
 
 const assert = chai.assert
