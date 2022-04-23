@@ -1,2 +1,2 @@
-import './parser'
-import './pprint'
+import './parser-test'
+import './pprint-test'
