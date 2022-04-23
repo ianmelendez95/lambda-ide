@@ -1,5 +1,5 @@
 import * as chai from 'chai'
-import { Doc, concat, line, nest, nil, text, layout } from '../src/lambda/pprint'
+import { Doc, concat, line, nest, nil, text, layout, group, pretty } from '../src/lambda/pprint'
 
 const assert = chai.assert
 
@@ -28,6 +28,15 @@ describe('pprint', function () {
         '       ii]',
         ']'
       ].join('\n'), layout(showTreeAlt(testTree())))
+    })
+  })
+  describe("#pretty", function () {
+    it('should indent tree to width 30', function () {
+      assert.equal(pretty(30, showTreeGrouped(testTree())), [
+        'aaa[bbbbb[ccc, dd],',
+        '    eee,',
+        '    ffff[gg, hhh, ii]]'
+      ].join('\n'))
     })
   })
 })
@@ -145,6 +154,46 @@ function showTreesAlt(ts: Tree[]): Doc {
       text(","),
       line(),
       showTrees(ts.slice(1))
+    )
+  }
+}
+
+/**
+ * showTreeGrouped (Node s ts) = text s <> showBracketGrouped ts
+ */
+function showTreeGrouped({ value, children }: Tree): Doc {
+  const s = value
+  const ts = children
+  return group(concat(text(s), nest(s.length, showBracketGrouped(ts))))
+}
+
+/**
+ * showBracketGrouped [] = nil
+ * showBracketGrouped ts = text "[" <> nest 1 (showTreesGrouped ts) <> text "]"
+ */
+function showBracketGrouped(ts: Tree[]): Doc {
+  return ts.length === 0
+    ? nil()
+    : concat(text("["),
+      nest(1, showTreesGrouped(ts)),
+      text("]"))
+}
+
+/**
+ * showTreesGrouped [t] = showTreeGrouped t
+ * showTreesGrouped (t:ts) = showTreeGrouped t <> text "," <> line <> showTreesGrouped ts
+ */
+function showTreesGrouped(ts: Tree[]): Doc {
+  if (ts.length === 0) {
+    throw new Error('Expecting at least one tree')
+  } else if (ts.length === 1) {
+    return showTreeGrouped(ts[0])
+  } else {
+    return concat(
+      showTreeGrouped(ts[0]),
+      text(","),
+      line(),
+      showTreesGrouped(ts.slice(1))
     )
   }
 }
