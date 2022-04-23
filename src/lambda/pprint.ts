@@ -1,5 +1,3 @@
-import { max } from "lodash"
-
 export type Doc = Nil | Line | Text | Union
 
 export type Nil = { kind: 'nil' }
