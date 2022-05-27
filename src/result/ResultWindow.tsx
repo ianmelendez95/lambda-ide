@@ -6,6 +6,7 @@ import * as R from '../lambda/reduce'
 import Parser from '../lambda/parser'
 import { EditorRef } from '../monaco/Editor'
 import { take } from '../util/generators';
+import { pprintLambda } from '../lambda/pprint';
 
 type Props = {
   editorRef: EditorRef
@@ -36,7 +37,7 @@ function showParseState(state: ParseState): string | JSX.Element[] {
     return state.value.map((expr) => {
       return (
         <div className="expr-div">
-          <pre>{L.showExpr(expr)}</pre>
+          <pre>{pprintLambda(expr)}</pre>
         </div>
       )
     })

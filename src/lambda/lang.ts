@@ -1,3 +1,4 @@
+import { pprintLambda } from "./pprint"
 
 export type App = {
   kind: "app",
@@ -40,13 +41,5 @@ export function mkLambda(v: Var, body: Expr): Lambda {
 }
 
 export function showExpr(expr: Expr): string {
-  if (expr.kind === 'var') {
-    return expr.name
-  } else if (expr.kind === 'num') {
-    return expr.value.toString()
-  } else if (expr.kind === 'app') {
-    return '(' + showExpr(expr.e1) + ' ' + showExpr(expr.e2) + ')'
-  } else {
-    return '(\\' + showExpr(expr.var) + '. ' + showExpr(expr.body) + ')'
-  }
+  return pprintLambda(expr)
 }
