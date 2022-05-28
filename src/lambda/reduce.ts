@@ -20,13 +20,43 @@ export function reduce1(expr: L.Expr): Maybe.Maybe<L.Expr> {
     const func = expr.e1
     if (func.kind === 'lambda') {
       return applyLambda(func.var.name, expr.e2, func.body)
+    } else if (func.kind === 'var') {
+      if (func.name === 'if') {
+        const e2Bool = parseBool(expr.e2)
+        if (Maybe.isJust(e2Bool)) {
+          return e2Bool ? ReturnFirst : ReturnSecond
+        } else {
+          return Maybe.bind<L.Expr, L.Expr>(reduce1(expr.e2), (e2Reduced) => {
+            return L.mkApp(func, e2Reduced)
+          })
+        }
+      } else {
+        return Maybe.Nothing
+      }
     } else {
-      const e1Reduced = reduce1(expr.e1)
-      return e1Reduced ? L.mkApp(e1Reduced, expr.e2) : null
+      return Maybe.bind(reduce1(expr.e1), (e1Reduced) => L.mkApp(e1Reduced, expr.e2))
     }
   } else {
-    return null
+    return Maybe.Nothing
   }
+}
+
+// (\x. \y. x)
+const ReturnFirst: L.Expr = L.mkLambda(L.mkVar('x'), L.mkLambda(L.mkVar('y'), L.mkVar('x')))
+
+// (\x. \y. y)
+const ReturnSecond: L.Expr = L.mkLambda(L.mkVar('x'), L.mkLambda(L.mkVar('y'), L.mkVar('x')))
+
+function parseBool(expr: L.Expr): Maybe.Maybe<boolean> {
+  if (expr.kind === 'var') {
+    if (expr.name === 'true') {
+      return true
+    } else if (expr.name === 'false') {
+      return false
+    }
+  }
+
+  return Maybe.Nothing
 }
 
 function applyLambda(varName: string, varValue: L.Expr, body: L.Expr): L.Expr {
@@ -43,4 +73,3 @@ function applyLambda(varName: string, varValue: L.Expr, body: L.Expr): L.Expr {
                    applyLambda(varName, varValue, body.e2))
   }
 }
-
