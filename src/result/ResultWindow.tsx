@@ -34,9 +34,9 @@ function showParseState(state: ParseState): string | JSX.Element[] {
   } else if (state.kind === 'state-error') {
     return state.message
   } else {
-    return state.value.map((expr) => {
+    return state.value.map((expr, i) => {
       return (
-        <div className="expr-div">
+        <div key={i} className="expr-div">
           <pre>{pprintLambda(expr)}</pre>
         </div>
       )
