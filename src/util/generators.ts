@@ -21,6 +21,17 @@ export function take<T>(count: number, generator: SimpleGenerator<T>): Array<T> 
 }
 
 /**
+ * 'Prepend' the value on the generator.
+ * @returns generator that yields the 'first' value, then
+ * yields the rest from the 'rest' generator.
+ */
+export function* prepend<T>(first: T, rest: SimpleGenerator<T>): SimpleGenerator<T> {
+  yield first
+  yield* rest
+  return null
+}
+
+/**
  * https://hackage.haskell.org/package/base-4.16.1.0/docs/Prelude.html#v:iterate 
  */
 export function* iterate<T>(initialInput: T, iterFunc: (input: T) => T): SimpleGenerator<T> {

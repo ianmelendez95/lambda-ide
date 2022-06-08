@@ -63,7 +63,7 @@ export default function ResultWindow({ editorRef }: Props): JSX.Element {
 
     try {
       const parsed: L.Expr = Parser.tryParse(editorRef.current.getValue())
-      const reduced: L.Expr[] = take(10, R.reduceGen(parsed))
+      const reduced: L.Expr[] = take(1000, R.reduceGen(parsed))
       setParseState(successState(reduced))
     } catch (e) {
       console.error(e)

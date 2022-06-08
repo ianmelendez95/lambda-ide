@@ -1,4 +1,5 @@
 import { SimpleGenerator, unfoldr } from '../util/generators'
+import * as Generators from '../util/generators'
 import * as Maybe from '../util/Maybe'
 import * as L from './lang'
 import * as Builtins from './builtins'
@@ -7,8 +8,10 @@ import * as Builtins from './builtins'
  * @returns generator of the expression as it is iteratively reduced
  */
 export function reduceGen(expr: L.Expr): SimpleGenerator<L.Expr> {
-  return unfoldr(expr, (input: L.Expr) =>
-    Maybe.map(reduce1(input), (reduced) => [input, reduced])
+  return Generators.prepend<L.Expr>(
+    expr,
+    unfoldr(expr, (input: L.Expr) =>
+      Maybe.map(reduce1(input), (reduced) => [reduced, reduced]))
   )
 }
 
