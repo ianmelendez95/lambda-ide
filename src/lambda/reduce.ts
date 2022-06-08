@@ -37,9 +37,8 @@ export function reduce1(expr: L.Expr): Maybe.Maybe<L.Expr> {
       }
     } else if (func.kind === 'var') {
       if (func.name === 'if') {
-        const e2Bool = parseBool(expr.e2)
-        if (Maybe.isJust(e2Bool)) {
-          return e2Bool ? ReturnFirst : ReturnSecond
+        if (expr.e2.kind === 'bool') {
+          return expr.e2.value ? ReturnFirst : ReturnSecond
         } else {
           return Maybe.bind<L.Expr, L.Expr>(reduce1(expr.e2), (e2Reduced) => {
             return L.mkApp(func, e2Reduced)
