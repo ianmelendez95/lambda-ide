@@ -9,13 +9,16 @@ export function pprintLambda(expr: L.Expr): string {
 function topprint(expr: L.Expr): PP.IDoc {
   if (expr.kind === 'var') {
     return expr.name
-  } else if (expr.kind === 'num') {
+  } else if (expr.kind === 'num' || expr.kind === 'bool') {
     return expr.value.toString()
   } else if (expr.kind === 'app') {
     return parens(nestBreak(topprint(expr.e1), topprint(expr.e2)))
-  } else {
+  } else if (expr.kind === 'lambda') {
     const lambdaBind: PP.IDoc = PP.prepend('\\', PP.prepend(topprint(expr.var), '.'))
     return parens(nestBreak(lambdaBind, topprint(expr.body)))
+  } else {
+    const prettyArgs = PP.group(PP.intersperse(PP.line, expr.args.map(topprint)))
+    return PP.enclose(PP.brackets, nestBreak(expr.func.name, prettyArgs))
   }
 }
 

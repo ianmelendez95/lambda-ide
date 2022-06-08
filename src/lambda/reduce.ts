@@ -1,6 +1,7 @@
 import { SimpleGenerator, unfoldr } from '../util/generators'
 import * as Maybe from '../util/Maybe'
 import * as L from './lang'
+import * as Builtins from './builtins'
 
 /**
  * @returns generator of the expression as it is iteratively reduced
@@ -16,10 +17,24 @@ export function reduceGen(expr: L.Expr): SimpleGenerator<L.Expr> {
  *          or null if in (beta) normal form
  */
 export function reduce1(expr: L.Expr): Maybe.Maybe<L.Expr> {
-  if (expr.kind === 'app') {
+  if (expr.kind === 'papp' && (expr.func.arity === expr.args.length)) {
+    return expr.func.body(expr.args)
+  } else if (expr.kind === 'app') {
     const func = expr.e1
     if (func.kind === 'lambda') {
       return applyLambda(func.var.name, expr.e2, func.body)
+    } else if (func.kind === 'papp') { 
+      // applying a partial application
+      if (func.func.arity === func.args.length) {
+        // has enough args, so we evaluate
+        return L.mkApp(func.func.body(func.args), expr.e2)
+      } else if (func.args.length < func.func.arity) {
+        // not enough args, push onto its arg stack
+        return L.mkPApp(func.func, [...func.args, expr.e2])
+      } else {
+        // too many args, which should be prevented by checks
+        throw new Error('Partial application has more arguments than expected: ' + L.showExpr(expr.e1))
+      }
     } else if (func.kind === 'var') {
       if (func.name === 'if') {
         const e2Bool = parseBool(expr.e2)
@@ -30,6 +45,8 @@ export function reduce1(expr: L.Expr): Maybe.Maybe<L.Expr> {
             return L.mkApp(func, e2Reduced)
           })
         }
+      } else if (func.name === '<') {
+        return L.mkPApp(Builtins.lessThan, [expr.e2])
       } else {
         return Maybe.Nothing
       }

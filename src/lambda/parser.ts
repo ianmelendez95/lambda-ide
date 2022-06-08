@@ -11,6 +11,10 @@ function Num(): P.Parser<L.Expr> {
   return P.regexp(/(?:\+|\-)?[0-9]+(?:\.[0-9]+)?(?:e(?:\+|\-)[0-9]+)?/).map(Number).map(L.mkNum)
 }
 
+function Bool(): P.Parser<L.Bool> {
+  return P.regexp(/(true|false)/).map((result) => result === 'true').map(L.mkBool)
+}
+
 function Var(): P.Parser<L.Var> {
   return P.regexp(/(?:[a-z][a-z0-9_-]*)|(?:[<>!#$%&*+./<=>?@^\-~]+)/).map(L.mkVar)
 }
