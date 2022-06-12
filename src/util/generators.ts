@@ -3,7 +3,7 @@
  * common lazy list functions available in Haskell.
  */
 
-import { Maybe } from "./Maybe"
+import * as Maybe from "./Maybe"
 
 export type SimpleGenerator<T> = Generator<T, null, void>
 
@@ -31,31 +31,11 @@ export function* prepend<T>(first: T, rest: SimpleGenerator<T>): SimpleGenerator
   return null
 }
 
-/**
- * https://hackage.haskell.org/package/base-4.16.1.0/docs/Prelude.html#v:iterate 
- */
-export function* iterate<T>(initialInput: T, iterFunc: (input: T) => T): SimpleGenerator<T> {
+export function* iterateMaybe<T>(initialInput: T, iterFunc: (input: T) => Maybe.Maybe<T>): SimpleGenerator<T> {
   let curInput = initialInput
-  while (true) {
+  while (curInput != null) {
     yield curInput
     curInput = iterFunc(curInput)
   }
-}
-
-/**
- * https://hackage.haskell.org/package/base-4.16.1.0/docs/Data-List.html#v:unfoldr
- */
-export function* unfoldr<A,B>(initialInput: B,
-                              unfoldrFunc: (input: B) => Maybe<[A, B]>): SimpleGenerator<A> {
-  let curInput = initialInput
-  while (true) {
-    const next: Maybe<[A, B]> = unfoldrFunc(curInput)
-    if (next === null) {
-      return null
-    } else {
-      const [nextValue, nextInput] = next
-      yield nextValue
-      curInput = nextInput
-    }
-  }
+  return null
 }

@@ -1,4 +1,4 @@
-import { SimpleGenerator, unfoldr } from '../util/generators'
+import { SimpleGenerator } from '../util/generators'
 import * as Generators from '../util/generators'
 import * as Maybe from '../util/Maybe'
 import * as L from './lang'
@@ -8,11 +8,7 @@ import * as Builtins from './builtins'
  * @returns generator of the expression as it is iteratively reduced
  */
 export function reduceGen(expr: L.Expr): SimpleGenerator<L.Expr> {
-  return Generators.prepend<L.Expr>(
-    expr,
-    unfoldr(expr, (input: L.Expr) =>
-      Maybe.map(reduce1(input), (reduced) => [reduced, reduced]))
-  )
+  return Generators.iterateMaybe(expr, reduce1)
 }
 
 /**
@@ -64,19 +60,7 @@ export function reduce1(expr: L.Expr): Maybe.Maybe<L.Expr> {
 const ReturnFirst: L.Expr = L.mkLambda(L.mkVar('x'), L.mkLambda(L.mkVar('y'), L.mkVar('x')))
 
 // (\x. \y. y)
-const ReturnSecond: L.Expr = L.mkLambda(L.mkVar('x'), L.mkLambda(L.mkVar('y'), L.mkVar('x')))
-
-function parseBool(expr: L.Expr): Maybe.Maybe<boolean> {
-  if (expr.kind === 'var') {
-    if (expr.name === 'true') {
-      return true
-    } else if (expr.name === 'false') {
-      return false
-    }
-  }
-
-  return Maybe.Nothing
-}
+const ReturnSecond: L.Expr = L.mkLambda(L.mkVar('x'), L.mkLambda(L.mkVar('y'), L.mkVar('y')))
 
 function applyLambda(varName: string, varValue: L.Expr, body: L.Expr): L.Expr {
   if (body.kind === 'num') {
