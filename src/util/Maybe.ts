@@ -7,6 +7,10 @@ export function isJust<A>(x: Maybe<A>): boolean {
   return x !== null
 }
 
+export function isNothing<A>(x: Maybe<A>): boolean {
+  return x === null
+}
+
 export function just<A>(x: A): Maybe<A> {
   return x
 }

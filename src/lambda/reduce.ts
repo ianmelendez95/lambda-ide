@@ -16,38 +16,26 @@ export function reduceGen(expr: L.Expr): SimpleGenerator<L.Expr> {
  *          or null if in (beta) normal form
  */
 export function reduce1(expr: L.Expr): Maybe.Maybe<L.Expr> {
-  if (expr.kind === 'papp' && (expr.func.arity === expr.args.length)) {
-    return expr.func.body(expr.args)
+  if (expr.kind === 'papp') {
+    return evalPApp(expr)
+  } else if (expr.kind === 'var') {
+    return Maybe.bind(
+      Builtins.lookupBuiltin(expr.name),
+      (builtin) => L.mkPApp(builtin, [])
+    )
   } else if (expr.kind === 'app') {
     const func = expr.e1
-    if (func.kind === 'lambda') {
+    if (func.kind === 'papp') {
+      const evaled = evalPApp(func)
+      if (Maybe.isJust(evaled)) {
+        // performed evaluation, so create the new application
+        return L.mkApp(evaled, expr.e2)
+      } else {
+        // couldn't evaluate the partial application, so push the argument onto it
+        return L.mkPApp(func.func, func.args.concat([expr.e2]))
+      }
+    } else if (func.kind === 'lambda') {
       return applyLambda(func.var.name, expr.e2, func.body)
-    } else if (func.kind === 'papp') { 
-      // applying a partial application
-      if (func.func.arity === func.args.length) {
-        // has enough args, so we evaluate
-        return L.mkApp(func.func.body(func.args), expr.e2)
-      } else if (func.args.length < func.func.arity) {
-        // not enough args, push onto its arg stack
-        return L.mkPApp(func.func, [...func.args, expr.e2])
-      } else {
-        // too many args, which should be prevented by checks
-        throw new Error('Partial application has more arguments than expected: ' + L.showExpr(expr.e1))
-      }
-    } else if (func.kind === 'var') {
-      if (func.name === 'if') {
-        if (expr.e2.kind === 'bool') {
-          return expr.e2.value ? ReturnFirst : ReturnSecond
-        } else {
-          return Maybe.bind<L.Expr, L.Expr>(reduce1(expr.e2), (e2Reduced) => {
-            return L.mkApp(func, e2Reduced)
-          })
-        }
-      } else if (func.name === '<') {
-        return L.mkPApp(Builtins.lessThan, [expr.e2])
-      } else {
-        return Maybe.Nothing
-      }
     } else {
       return Maybe.bind(reduce1(expr.e1), (e1Reduced) => L.mkApp(e1Reduced, expr.e2))
     }
@@ -56,11 +44,41 @@ export function reduce1(expr: L.Expr): Maybe.Maybe<L.Expr> {
   }
 }
 
-// (\x. \y. x)
-const ReturnFirst: L.Expr = L.mkLambda(L.mkVar('x'), L.mkLambda(L.mkVar('y'), L.mkVar('x')))
+function evalPApp(papp: L.PApp): Maybe.Maybe<L.Expr> {
+  if (papp.args.length < papp.func.arity) {
+    // not enough args, so we do not reduce or produce a value
+    return null
+  } else if (papp.args.length > papp.func.arity) {
+    // too many args, throw an error
+    throw new Error('Partial application has more arguments than expected: ' + L.showExpr(papp))
+  } else {
+    // enough args, attempt to reduce an argument
+    const reducedArgs = reduceFirstReducibleExpression(papp.args)
+    if (Maybe.isJust(reducedArgs)) {
+      // found a reduble argument, return the partial app with this argument reduced
+      return L.mkPApp(papp.func, reducedArgs)
+    } else {
+      // no arguments reducible, so delegate to the function to evaluate with the arguments
+      return papp.func.body(papp.args)
+    }
+  }
+}
 
-// (\x. \y. y)
-const ReturnSecond: L.Expr = L.mkLambda(L.mkVar('x'), L.mkLambda(L.mkVar('y'), L.mkVar('y')))
+function reduceFirstReducibleExpression(exprs: L.Expr[]): Maybe.Maybe<Array<L.Expr>> {
+  let reducedExpr = Maybe.Nothing
+  for (let i = 0; i < exprs.length; i++) {
+    reducedExpr = reduce1(exprs[i])
+    if (Maybe.isJust(reducedExpr)) {
+      // found first reducible expression, reduce it and return
+      let newExprs = [...exprs]
+      newExprs[i] = reducedExpr
+      return Maybe.just(newExprs)
+    }   
+  }
+
+  // did not encounter a reducible expression, so no result
+  return Maybe.Nothing
+}
 
 function applyLambda(varName: string, varValue: L.Expr, body: L.Expr): L.Expr {
   if (body.kind === 'num') {
@@ -68,11 +86,11 @@ function applyLambda(varName: string, varValue: L.Expr, body: L.Expr): L.Expr {
   } else if (body.kind === 'var') {
     return (body.name === varName) ? varValue : body
   } else if (body.kind === 'lambda') {
-    return (body.var.name === varName) 
+    return (body.var.name === varName)
       ? body  // name is bound by this lambda, so no substitution is necessary
       : L.mkLambda(body.var, applyLambda(varName, varValue, body.body))
   } else if (body.kind === 'app') {
-    return L.mkApp(applyLambda(varName, varValue, body.e1), 
-                   applyLambda(varName, varValue, body.e2))
+    return L.mkApp(applyLambda(varName, varValue, body.e1),
+      applyLambda(varName, varValue, body.e2))
   }
 }
