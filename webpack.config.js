@@ -8,7 +8,7 @@ module.exports = {
     index: './src/index.ts',
     test: './test/test.ts'
   },
-  devtool: 'eval-source-map',
+  devtool: 'source-map',
   devServer: {
     static: {
       directory: path.join(__dirname, 'dist'),
