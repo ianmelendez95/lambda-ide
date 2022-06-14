@@ -1,5 +1,6 @@
 import * as PP from 'prettier-printer'
 import * as L from './lang'
+import * as Arrays from '../util/arrays'
 
 
 export function pprintLambda(expr: L.Expr): string {
@@ -17,8 +18,29 @@ function topprint(expr: L.Expr): PP.IDoc {
     const lambdaBind: PP.IDoc = PP.prepend('\\', PP.prepend(topprint(expr.var), '.'))
     return parens(nestBreak(lambdaBind, topprint(expr.body)))
   } else {
-    const prettyArgs = PP.group(PP.intersperse(PP.line, expr.args.map(topprint)))
-    return PP.enclose(PP.brackets, nestBreak(expr.func.name, prettyArgs))
+    return pprintPApp(expr)
+  }
+}
+
+function pprintPApp(papp: L.PApp): PP.IDoc {
+  if (papp.args.length > papp.func.arity) {
+    // can't properly print the actual application since we are in the printing code
+    throw new Error("Partial application has more arguments than the function's arity")
+  }
+
+  // collect the args as IDocs, where '_' stands in for unprovided args
+  const argDocs: PP.IDoc[] = Arrays.repeat('_', papp.func.arity)
+  papp.args.map(topprint).forEach((argDoc: PP.IDoc, i: number) => {
+    // update the placeholders with the provided arg document
+    argDocs[i] = argDoc
+  })
+
+  try {
+    const prettyArgs = PP.group(PP.intersperse(PP.line, argDocs))
+    return PP.enclose(PP.brackets, nestBreak(papp.func.name, prettyArgs))
+  } catch (e) {
+    console.error(e)
+    return '[[ERROR]]'
   }
 }
 
