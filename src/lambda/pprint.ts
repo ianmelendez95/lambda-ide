@@ -4,10 +4,16 @@ import * as Arrays from '../util/arrays'
 
 
 export function pprintLambda(expr: L.Expr): string {
-  return PP.renderWith({
+  return indentsToNBSP(PP.renderWith({
     line: result => result + '<br/>',
     text: (result, text) => result + text
-  }, '', 80, topprint(expr))
+  }, '', 80, topprint(expr)))
+}
+
+function indentsToNBSP(text: string): string {
+  return text.replace(/<br\/>(\s+)/g, (_: string, whitespace: string): string => {
+    return '<br/>' + '&nbsp'.repeat(whitespace.length)
+  })
 }
 
 function topprint(expr: L.Expr): PP.IDoc {
