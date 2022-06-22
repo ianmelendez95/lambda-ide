@@ -29,4 +29,7 @@ body {
   padding: 10px 5px;
   color: rgb(195, 195, 195);
   border-bottom: 1px solid gray;
+
+  font-family: monospace;
+  white-space: nowrap;
 }

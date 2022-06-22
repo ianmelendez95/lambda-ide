@@ -4,10 +4,18 @@ import * as Arrays from '../util/arrays'
 
 
 export function pprintLambda(expr: L.Expr): string {
-  return PP.render(80, topprint(expr))
+  return PP.renderWith({
+    line: result => result + '<br/>',
+    text: (result, text) => result + text
+  }, '', 80, topprint(expr))
 }
 
 function topprint(expr: L.Expr): PP.IDoc {
+  const barePPrint: PP.IDoc = topprintBare(expr)
+  return expr.reduced ? PP.prepend('<b>', PP.append('</b>', barePPrint)) : barePPrint
+}
+
+function topprintBare(expr: L.Expr): PP.IDoc {
   if (expr.kind === 'var') {
     return expr.name
   } else if (expr.kind === 'num' || expr.kind === 'bool') {

@@ -36,8 +36,7 @@ function showParseState(state: ParseState): string | JSX.Element[] {
   } else {
     return state.value.map((expr, i) => {
       return (
-        <div key={i} className="expr-div">
-          <pre>{pprintLambda(expr)}</pre>
+        <div key={i} className="expr-div" dangerouslySetInnerHTML={{ __html: pprintLambda(expr) }}>
         </div>
       )
     })

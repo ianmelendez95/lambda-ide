@@ -16,12 +16,14 @@ export function reduceGen(expr: L.Expr): SimpleGenerator<L.Expr> {
  *          or null if in (beta) normal form
  */
 export function reduce1(expr: L.Expr): Maybe.Maybe<L.Expr> {
+  L.unflagReduced(expr) // be sure to reset the 'reduced' status of the expression
+
   if (expr.kind === 'papp') {
     return evalPApp(expr)
   } else if (expr.kind === 'var') {
     return Maybe.bind(
       Builtins.lookupBuiltin(expr.name),
-      (builtin) => L.mkPApp(builtin, [])
+      (builtin) => L.flagReduced(L.mkPApp(builtin, []))
     )
   } else if (expr.kind === 'app') {
     const func = expr.e1
@@ -32,10 +34,10 @@ export function reduce1(expr: L.Expr): Maybe.Maybe<L.Expr> {
         return L.mkApp(evaled, expr.e2)
       } else {
         // couldn't evaluate the partial application, so push the argument onto it
-        return L.mkPApp(func.func, func.args.concat([expr.e2]))
+        return L.flagReduced(L.mkPApp(func.func, func.args.concat([expr.e2])))
       }
     } else if (func.kind === 'lambda') {
-      return applyLambda(func.var.name, expr.e2, func.body)
+      return L.flagReduced(applyLambda(func.var.name, expr.e2, func.body))
     } else {
       return Maybe.bind(reduce1(expr.e1), (e1Reduced) => L.mkApp(e1Reduced, expr.e2))
     }
@@ -59,7 +61,7 @@ function evalPApp(papp: L.PApp): Maybe.Maybe<L.Expr> {
       return L.mkPApp(papp.func, reducedArgs)
     } else {
       // no arguments reducible, so delegate to the function to evaluate with the arguments
-      return papp.func.body(papp.args)
+      return L.flagReduced(papp.func.body(papp.args))
     }
   }
 }
@@ -71,7 +73,7 @@ function reduceFirstReducibleExpression(exprs: L.Expr[]): Maybe.Maybe<Array<L.Ex
     if (Maybe.isJust(reducedExpr)) {
       // found first reducible expression, reduce it and return
       let newExprs = [...exprs]
-      newExprs[i] = reducedExpr
+      newExprs[i] = L.flagReduced(reducedExpr)
       return Maybe.just(newExprs)
     }   
   }
